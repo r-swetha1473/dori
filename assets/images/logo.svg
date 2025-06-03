@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="3107px" height="1000px" viewBox="0 0 3107 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>dori_logo2_full_blue</title>
+    <defs>
+        <circle id="path-1" cx="500" cy="500" r="500"></circle>
+        <circle id="path-3" cx="260" cy="260.5" r="260"></circle>
+        <circle id="path-5" cx="260" cy="260.5" r="260"></circle>
+        <circle id="path-7" cx="260" cy="260.5" r="260"></circle>
+        <path d="M260,520 C403.594035,520 520,403.594035 520,260 C520,116.405965 403.594035,0 260,0 C116.405965,0 0,116.405965 0,260 C0,403.594035 116.405965,520 260,520 Z" id="path-9"></path>
+        <mask id="mask-10" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="520" height="520" fill="white">
+            <use xlink:href="#path-9"></use>
+        </mask>
+        <mask id="mask-12" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="520" height="520" fill="white">
+            <use xlink:href="#path-9"></use>
+        </mask>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-1622.000000, -3183.000000)">
+            <g id="dori_logo2_full_blue" transform="translate(1622.000000, 3183.000000)">
+                <g id="dori_logo_symbol2" transform="translate(500.000000, 500.000000) scale(-1, 1) rotate(90.000000) translate(-500.000000, -500.000000) ">
+                    <g id="Rectangle">
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <use id="Mask" fill="#2E5668" xlink:href="#path-1"></use>
+                        <rect fill="#FFFFFF" mask="url(#mask-2)" x="664" y="0" width="100" height="500"></rect>
+                        <rect id="Rectangle-Copy-11" fill="#FFFFFF" mask="url(#mask-2)" x="244" y="500" width="100" height="500"></rect>
+                    </g>
+                    <g id="Rectangle-Copy" transform="translate(244.000000, 241.000000)">
+                        <mask id="mask-4" fill="white">
+                            <use xlink:href="#path-3"></use>
+                        </mask>
+                        <use id="Mask" fill="#FFFFFF" xlink:href="#path-3"></use>
+                    </g>
+                    <circle id="Oval-Copy" fill="#2E5668" cx="501" cy="501" r="163"></circle>
+                </g>
+                <g id="dori_logo_full2_blue" transform="translate(1200.000000, 69.000000)">
+                    <g id="dori_logo_full_blue-copy">
+                        <g id="Group-2">
+                            <rect id="Rectangle" fill="#2E5668" x="420" y="50" width="100" height="388"></rect>
+                            <rect id="Rectangle-Copy-3" fill="#2E5668" x="1040" y="429" width="100" height="271"></rect>
+                            <g id="Rectangle-Copy" transform="translate(0.000000, 179.000000)">
+                                <mask id="mask-6" fill="white">
+                                    <use xlink:href="#path-5"></use>
+                                </mask>
+                                <circle stroke="#2E5668" stroke-width="100" cx="260" cy="260.5" r="210"></circle>
+                                <rect fill="#2E5668" mask="url(#mask-6)" x="420" y="56" width="100" height="465"></rect>
+                            </g>
+                            <g id="Rectangle-Copy" transform="translate(520.000000, 179.000000)">
+                                <mask id="mask-8" fill="white">
+                                    <use xlink:href="#path-7"></use>
+                                </mask>
+                                <circle stroke="#2E5668" stroke-width="100" cx="260" cy="260.5" r="210"></circle>
+                            </g>
+                            <g id="Rectangle-Copy" transform="translate(1040.000000, 169.000000)">
+                                <mask id="mask-11" fill="white">
+                                    <use xlink:href="#path-9"></use>
+                                </mask>
+                                <g id="Mask" stroke="#2E5668" mask="url(#mask-10)" stroke-width="200" stroke-dasharray="669,1632.800048828125" transform="translate(260.000000, 260.000000) scale(-1, 1) rotate(270.000000) translate(-260.000000, -260.000000) ">
+                                    <use mask="url(#mask-12)" xlink:href="#path-9"></use>
+                                </g>
+                            </g>
+                            <rect id="Rectangle-Copy-2" fill="#2E5668" x="1527" y="219" width="100" height="481"></rect>
+                            <circle id="Oval" fill="#2E5668" cx="470" cy="50" r="50"></circle>
+                            <circle id="Oval-Copy-2" fill="#2E5668" cx="1577" cy="50" r="50"></circle>
+                            <circle id="Oval-Copy-4" fill="#2E5668" cx="1577" cy="219" r="50"></circle>
+                            <circle id="Oval-Copy-3" fill="#2E5668" cx="1477" cy="316" r="50"></circle>
+                        </g>
+                        <g id="a_blue" transform="translate(1777.500000, 787.500000) rotate(180.000000) translate(-1777.500000, -787.500000) translate(1710.000000, 713.000000)">
+                            <rect id="Rectangle-Copy-6" fill="#2E5668" x="109" y="-4.54747351e-13" width="26" height="94"></rect>
+                            <rect id="Rectangle-Copy-6" fill="#2E5668" x="0" y="-4.54747351e-13" width="26" height="94"></rect>
+                            <path d="M13,94 C13,124.375661 37.4004811,149 67.5,149 C97.5995189,149 122,124.375661 122,94" id="Path" stroke="#2E5668" stroke-width="26"></path>
+                            <polygon id="Rectangle-Copy-8" fill="#2E5668" transform="translate(67.000000, 67.000000) rotate(90.000000) translate(-67.000000, -67.000000) " points="54 25 80 25 80 109 54 109"></polygon>
+                        </g>
+                    </g>
+                    <rect id="Rectangle-Copy-2" fill="#2E5668" x="1885" y="710.214286" width="22" height="152"></rect>
+                    <circle id="Oval-Copy-4" fill="#2E5668" cx="1896" cy="711" r="11"></circle>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
