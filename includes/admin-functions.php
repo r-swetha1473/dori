@@ -321,6 +321,7 @@ function logActivity($action, $itemType, $itemId, $itemName) {
         return false;
     }
 }
+
 /**
  * Format date
  */
@@ -413,4 +414,139 @@ function uploadFile($file) {
             'error' => 'Failed to move uploaded file'
         ];
     }
+}
+
+/**
+ * Get all menu items
+ */
+function getAllMenuItems() {
+    global $pdo;
+    
+    $stmt = $pdo->query("
+        SELECT m.*, p.title as page_title 
+        FROM menu_items m
+        LEFT JOIN pages p ON m.page_id = p.id
+        ORDER BY m.parent_id, m.order_num
+    ");
+    
+    return $stmt->fetchAll();
+}
+
+/**
+ * Get menu item by ID
+ */
+function getMenuItemById($id) {
+    global $pdo;
+    
+    $stmt = $pdo->prepare("
+        SELECT m.*, p.title as page_title 
+        FROM menu_items m
+        LEFT JOIN pages p ON m.page_id = p.id
+        WHERE m.id = ?
+    ");
+    $stmt->execute([$id]);
+    
+    return $stmt->fetch();
+}
+
+/**
+ * Add menu item
+ */
+function addMenuItem($data) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO menu_items (title, url, page_id, parent_id, order_num)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        
+        $stmt->execute([
+            $data['title'],
+            $data['url'] ?? null,
+            $data['page_id'] ?? null,
+            $data['parent_id'] ?? null,
+            $data['order_num'] ?? 0
+        ]);
+        
+        return $pdo->lastInsertId();
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/**
+ * Update menu item
+ */
+function updateMenuItem($id, $data) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("
+            UPDATE menu_items 
+            SET title = ?, url = ?, page_id = ?, parent_id = ?, order_num = ?
+            WHERE id = ?
+        ");
+        
+        return $stmt->execute([
+            $data['title'],
+            $data['url'] ?? null,
+            $data['page_id'] ?? null,
+            $data['parent_id'] ?? null,
+            $data['order_num'] ?? 0,
+            $id
+        ]);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/**
+ * Delete menu item
+ */
+function deleteMenuItem($id) {
+    global $pdo;
+    
+    try {
+        // First update any child items to have no parent
+        $stmt = $pdo->prepare("
+            UPDATE menu_items 
+            SET parent_id = NULL 
+            WHERE parent_id = ?
+        ");
+        $stmt->execute([$id]);
+        
+        // Then delete the menu item
+        $stmt = $pdo->prepare("DELETE FROM menu_items WHERE id = ?");
+        return $stmt->execute([$id]);
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/**
+ * Build menu hierarchy
+ */
+function buildMenuHierarchy($items, $parentId = null) {
+    $branch = [];
+    
+    foreach ($items as $item) {
+        if ($item['parent_id'] == $parentId) {
+            $children = buildMenuHierarchy($items, $item['id']);
+            if ($children) {
+                $item['children'] = $children;
+            }
+            $branch[] = $item;
+        }
+    }
+    
+    return $branch;
+}
+
+/**
+ * Get frontend menu
+ */
+function getFrontendMenu() {
+    $items = getAllMenuItems();
+    return buildMenuHierarchy($items);
 }
