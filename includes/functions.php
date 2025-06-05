@@ -22,7 +22,7 @@ function getSectionContent($pageSlug, $sectionName) {
     $stmt = $pdo->prepare("
         SELECT s.* FROM sections s
         JOIN pages p ON s.page_id = p.id
-        WHERE p.slug = ? AND s.section_name = ?
+        WHERE p.slug = ? AND s.section_name = ? AND s.is_active = 1
     ");
     $stmt->execute([$pageSlug, $sectionName]);
     
@@ -39,7 +39,7 @@ function getSectionItems($pageSlug, $sectionName) {
         SELECT si.* FROM section_items si
         JOIN sections s ON si.section_id = s.id
         JOIN pages p ON s.page_id = p.id
-        WHERE p.slug = ? AND s.section_name = ?
+        WHERE p.slug = ? AND s.section_name = ? AND s.is_active = 1
         ORDER BY si.order_num ASC
     ");
     $stmt->execute([$pageSlug, $sectionName]);
@@ -87,11 +87,10 @@ function getCaseStudies($limit = 3) {
 function getPartners() {
     global $pdo;
     
-    $stmt = $pdo->prepare("
+    $stmt = $pdo->query("
         SELECT * FROM partners
         ORDER BY order_num ASC
     ");
-    $stmt->execute();
     
     return $stmt->fetchAll();
 }

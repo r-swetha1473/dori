@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = trim($_POST['description'] ?? '');
     $content = $_POST['content'] ?? '';
     $orderNum = (int)$_POST['order_num'];
+    $isActive = isset($_POST['is_active']) ? 1 : 0;
     
     // Handle image upload
     $imagePath = $section['image_path'] ?? '';
@@ -58,6 +59,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Section name is required";
     }
     
+    if (empty($pageId)) {
+        $errors[] = "Page is required";
+    }
+    
     if (empty($errors)) {
         $sectionData = [
             'page_id' => $pageId,
@@ -67,7 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'description' => $description,
             'content' => $content,
             'image_path' => $imagePath,
-            'order_num' => $orderNum
+            'order_num' => $orderNum,
+            'is_active' => $isActive
         ];
         
         if ($isNew) {
@@ -79,6 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if ($result) {
+            // Clear cache to ensure frontend updates
+            clearPageCache($pageId);
+            
             $_SESSION['success_message'] = $message;
             header('Location: sections.php' . ($pageId ? "?page_id={$pageId}" : ''));
             exit;
@@ -112,6 +121,7 @@ require_once 'includes/admin-header.php';
             <div class="form-group">
                 <label for="page_id">Page</label>
                 <select id="page_id" name="page_id" required>
+                    <option value="">Select a page...</option>
                     <?php foreach ($pages as $page): ?>
                     <option value="<?= $page['id'] ?>" <?= ($page['id'] == ($section['page_id'] ?? $pageId) ? 'selected' : '') ?>>
                         <?= htmlspecialchars($page['title']) ?>
@@ -159,6 +169,14 @@ require_once 'includes/admin-header.php';
             <div class="form-group">
                 <label for="order_num">Order</label>
                 <input type="number" id="order_num" name="order_num" value="<?= (int)($section['order_num'] ?? 0) ?>">
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="is_active" value="1" <?= (!$isNew && isset($section['is_active']) && $section['is_active']) ? 'checked' : '' ?>>
+                    Active
+                </label>
+                <small>Only active sections will be displayed on the frontend</small>
             </div>
             
             <div class="form-actions">

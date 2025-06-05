@@ -8,7 +8,6 @@ function getAllPages() {
     global $pdo;
     
     $stmt = $pdo->query("SELECT * FROM pages ORDER BY title ASC");
-    
     return $stmt->fetchAll();
 }
 
@@ -43,8 +42,13 @@ function addPage($pageData) {
             $pageData['content']
         ]);
         
+        $pageId = $pdo->lastInsertId();
+        
+        // Clear cache
+        clearPageCache($pageId);
+        
         // Log activity
-        logActivity('create', 'page', $pdo->lastInsertId(), $pageData['title']);
+        logActivity('create', 'page', $pageId, $pageData['title']);
         
         return true;
     } catch (PDOException $e) {
@@ -73,6 +77,9 @@ function updatePage($pageId, $pageData) {
             $pageId
         ]);
         
+        // Clear cache
+        clearPageCache($pageId);
+        
         // Log activity
         logActivity('update', 'page', $pageId, $pageData['title']);
         
@@ -98,6 +105,9 @@ function deletePage($pageId) {
         $stmt = $pdo->prepare("DELETE FROM pages WHERE id = ?");
         $stmt->execute([$pageId]);
         
+        // Clear cache
+        clearPageCache($pageId);
+        
         // Log activity
         logActivity('delete', 'page', $pageId, $page['title']);
         
@@ -105,18 +115,6 @@ function deletePage($pageId) {
     } catch (PDOException $e) {
         return false;
     }
-}
-
-/**
- * Check if a slug already exists
- */
-function slugExists($slug) {
-    global $pdo;
-    
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM pages WHERE slug = ?");
-    $stmt->execute([$slug]);
-    
-    return $stmt->fetchColumn() > 0;
 }
 
 /**
@@ -145,7 +143,7 @@ function getSectionsByPageId($pageId) {
         SELECT s.*, p.title as page_title
         FROM sections s
         JOIN pages p ON s.page_id = p.id
-        WHERE s.page_id = ?
+        WHERE s.page_id = ? AND s.is_active = 1
         ORDER BY s.order_num ASC
     ");
     $stmt->execute([$pageId]);
@@ -179,8 +177,8 @@ function addSection($sectionData) {
     try {
         $stmt = $pdo->prepare("
             INSERT INTO sections 
-            (page_id, section_name, title, subtitle, description, content, image_path, order_num)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (page_id, section_name, title, subtitle, description, content, image_path, order_num, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
@@ -191,11 +189,17 @@ function addSection($sectionData) {
             $sectionData['description'] ?? null,
             $sectionData['content'] ?? null,
             $sectionData['image_path'] ?? null,
-            $sectionData['order_num'] ?? 0
+            $sectionData['order_num'] ?? 0,
+            $sectionData['is_active'] ?? 1
         ]);
         
+        $sectionId = $pdo->lastInsertId();
+        
+        // Clear cache
+        clearPageCache($sectionData['page_id']);
+        
         // Log activity
-        logActivity('create', 'section', $pdo->lastInsertId(), $sectionData['section_name']);
+        logActivity('create', 'section', $sectionId, $sectionData['section_name']);
         
         return true;
     } catch (PDOException $e) {
@@ -213,7 +217,7 @@ function updateSection($sectionId, $sectionData) {
         $stmt = $pdo->prepare("
             UPDATE sections
             SET page_id = ?, section_name = ?, title = ?, subtitle = ?, 
-                description = ?, content = ?, image_path = ?, order_num = ?
+                description = ?, content = ?, image_path = ?, order_num = ?, is_active = ?
             WHERE id = ?
         ");
         
@@ -226,8 +230,12 @@ function updateSection($sectionId, $sectionData) {
             $sectionData['content'] ?? null,
             $sectionData['image_path'] ?? null,
             $sectionData['order_num'] ?? 0,
+            $sectionData['is_active'] ?? 1,
             $sectionId
         ]);
+        
+        // Clear cache
+        clearPageCache($sectionData['page_id']);
         
         // Log activity
         logActivity('update', 'section', $sectionId, $sectionData['section_name']);
@@ -245,14 +253,17 @@ function deleteSection($sectionId) {
     global $pdo;
     
     try {
-        // Get section name for activity log
-        $stmt = $pdo->prepare("SELECT section_name FROM sections WHERE id = ?");
+        // Get section info for cache clearing and activity log
+        $stmt = $pdo->prepare("SELECT section_name, page_id FROM sections WHERE id = ?");
         $stmt->execute([$sectionId]);
         $section = $stmt->fetch();
         
         // Delete section
         $stmt = $pdo->prepare("DELETE FROM sections WHERE id = ?");
         $stmt->execute([$sectionId]);
+        
+        // Clear cache
+        clearPageCache($section['page_id']);
         
         // Log activity
         logActivity('delete', 'section', $sectionId, $section['section_name']);
@@ -264,13 +275,30 @@ function deleteSection($sectionId) {
 }
 
 /**
+ * Clear page cache
+ */
+function clearPageCache($pageId) {
+    // Get page slug
+    global $pdo;
+    $stmt = $pdo->prepare("SELECT slug FROM pages WHERE id = ?");
+    $stmt->execute([$pageId]);
+    $page = $stmt->fetch();
+    
+    if ($page) {
+        $cacheFile = __DIR__ . '/../cache/' . $page['slug'] . '.html';
+        if (file_exists($cacheFile)) {
+            unlink($cacheFile);
+        }
+    }
+}
+
+/**
  * Get total count of a table
  */
 function getTotalCount($table) {
     global $pdo;
     
     $stmt = $pdo->query("SELECT COUNT(*) FROM {$table}");
-    
     return $stmt->fetchColumn();
 }
 
@@ -414,139 +442,4 @@ function uploadFile($file) {
             'error' => 'Failed to move uploaded file'
         ];
     }
-}
-
-/**
- * Get all menu items
- */
-function getAllMenuItems() {
-    global $pdo;
-    
-    $stmt = $pdo->query("
-        SELECT m.*, p.title as page_title 
-        FROM menu_items m
-        LEFT JOIN pages p ON m.page_id = p.id
-        ORDER BY m.parent_id, m.order_num
-    ");
-    
-    return $stmt->fetchAll();
-}
-
-/**
- * Get menu item by ID
- */
-function getMenuItemById($id) {
-    global $pdo;
-    
-    $stmt = $pdo->prepare("
-        SELECT m.*, p.title as page_title 
-        FROM menu_items m
-        LEFT JOIN pages p ON m.page_id = p.id
-        WHERE m.id = ?
-    ");
-    $stmt->execute([$id]);
-    
-    return $stmt->fetch();
-}
-
-/**
- * Add menu item
- */
-function addMenuItem($data) {
-    global $pdo;
-    
-    try {
-        $stmt = $pdo->prepare("
-            INSERT INTO menu_items (title, url, page_id, parent_id, order_num)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        
-        $stmt->execute([
-            $data['title'],
-            $data['url'] ?? null,
-            $data['page_id'] ?? null,
-            $data['parent_id'] ?? null,
-            $data['order_num'] ?? 0
-        ]);
-        
-        return $pdo->lastInsertId();
-    } catch (PDOException $e) {
-        return false;
-    }
-}
-
-/**
- * Update menu item
- */
-function updateMenuItem($id, $data) {
-    global $pdo;
-    
-    try {
-        $stmt = $pdo->prepare("
-            UPDATE menu_items 
-            SET title = ?, url = ?, page_id = ?, parent_id = ?, order_num = ?
-            WHERE id = ?
-        ");
-        
-        return $stmt->execute([
-            $data['title'],
-            $data['url'] ?? null,
-            $data['page_id'] ?? null,
-            $data['parent_id'] ?? null,
-            $data['order_num'] ?? 0,
-            $id
-        ]);
-    } catch (PDOException $e) {
-        return false;
-    }
-}
-
-/**
- * Delete menu item
- */
-function deleteMenuItem($id) {
-    global $pdo;
-    
-    try {
-        // First update any child items to have no parent
-        $stmt = $pdo->prepare("
-            UPDATE menu_items 
-            SET parent_id = NULL 
-            WHERE parent_id = ?
-        ");
-        $stmt->execute([$id]);
-        
-        // Then delete the menu item
-        $stmt = $pdo->prepare("DELETE FROM menu_items WHERE id = ?");
-        return $stmt->execute([$id]);
-    } catch (PDOException $e) {
-        return false;
-    }
-}
-
-/**
- * Build menu hierarchy
- */
-function buildMenuHierarchy($items, $parentId = null) {
-    $branch = [];
-    
-    foreach ($items as $item) {
-        if ($item['parent_id'] == $parentId) {
-            $children = buildMenuHierarchy($items, $item['id']);
-            if ($children) {
-                $item['children'] = $children;
-            }
-            $branch[] = $item;
-        }
-    }
-    
-    return $branch;
-}
-
-/**
- * Get frontend menu
- */
-function getFrontendMenu() {
-    $items = getAllMenuItems();
-    return buildMenuHierarchy($items);
 }
