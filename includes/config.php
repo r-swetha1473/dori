@@ -14,7 +14,7 @@ define('DB_PASS', '');
 
 // Site configuration
 define('SITE_NAME', 'Dori');
-define('SITE_URL', 'http://localhost/Projects/02-06-25/Dori/dori');
+define('SITE_URL', 'http://localhost/Projects/03-06-25/dori-ai/');
 define('ADMIN_EMAIL', 'admin@example.com');
 
 // File uploads
